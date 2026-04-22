@@ -1,0 +1,25 @@
+# Python 스크립트
+*.py
+__pycache__/
+*.pyc
+
+# 배치 파일
+*.bat
+
+# 실행 파일
+*.exe
+
+# 문서 (README 제외)
+*.md
+!README.md
+
+# 백업 폴더
+*backup*/
+*temp*/
+
+# 로그
+*.log
+
+# 시스템 파일
+.DS_Store
+Thumbs.db
