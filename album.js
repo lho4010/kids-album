@@ -258,6 +258,12 @@ function showPage(pageNum) {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
     
+    // 이전 페이지의 이미지 언로드 (메모리 절약)
+    const previousActivePage = document.querySelector('.page-spread.active');
+    if (previousActivePage) {
+        unloadPageImages(previousActivePage);
+    }
+    
     pages.forEach((page, index) => {
         if (index === pageNum) {
             page.classList.add('active');
@@ -288,33 +294,52 @@ function showPage(pageNum) {
     });
 }
 
-// 페이지별 이미지 로드 - 필요할 때만
+// 페이지별 이미지 로드 - 현재 보이는 것만
 function loadPageImages(pageElement) {
     const images = pageElement.querySelectorAll('img[data-src]:not(.loaded)');
     
-    // 한 번에 5개씩 로드 (서버 부하 방지)
-    let loadedCount = 0;
-    const batchSize = 5;
-    
-    function loadBatch(startIndex) {
-        const endIndex = Math.min(startIndex + batchSize, images.length);
-        
-        for (let i = startIndex; i < endIndex; i++) {
-            const img = images[i];
-            if (img.dataset.src) {
-                img.src = img.dataset.src;
-                img.classList.add('loaded');
-                loadedCount++;
-            }
-        }
-        
-        // 더 로드할 이미지가 있으면 100ms 후에 다음 배치 로드
-        if (endIndex < images.length) {
-            setTimeout(() => loadBatch(endIndex), 100);
+    // 처음 3개만 즉시 로드 (빠른 표시)
+    const initialLoad = 3;
+    for (let i = 0; i < Math.min(initialLoad, images.length); i++) {
+        const img = images[i];
+        if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.classList.add('loaded');
         }
     }
     
-    loadBatch(0);
+    // 나머지는 Intersection Observer로 스크롤 시 로드
+    if (images.length > initialLoad && 'IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src && !img.classList.contains('loaded')) {
+                        img.src = img.dataset.src;
+                        img.classList.add('loaded');
+                        observer.unobserve(img);
+                    }
+                }
+            });
+        }, {
+            rootMargin: '100px'  // 뷰포트 100px 전에 미리 로드
+        });
+        
+        for (let i = initialLoad; i < images.length; i++) {
+            imageObserver.observe(images[i]);
+        }
+    }
+}
+
+// 페이지 언로드 - 메모리 절약
+function unloadPageImages(pageElement) {
+    const images = pageElement.querySelectorAll('img.loaded');
+    images.forEach(img => {
+        if (img.dataset.src) {
+            img.removeAttribute('src');
+            img.classList.remove('loaded');
+        }
+    });
 }
 
 // 네비게이션 버튼 업데이트
@@ -503,20 +528,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 이미지 Lazy Loading - 현재 페이지만 로드
 function initLazyLoading() {
-    const images = document.querySelectorAll('img');
-    
-    // 모든 이미지에 loading="lazy" 속성 추가하고 src 제거
-    images.forEach(img => {
-        if (!img.hasAttribute('loading')) {
-            img.setAttribute('loading', 'lazy');
-        }
-        
-        // 원본 src를 data 속성에 저장하고 src 제거 (로드 방지)
-        if (img.src && !img.dataset.src) {
-            img.dataset.src = img.src;
-            img.removeAttribute('src');  // 즉시 로드 방지
-        }
-    });
+    // 아무것도 하지 않음 (HTML에서 이미 data-src로 설정됨)
+    // 페이지별로 필요할 때만 로드
 }
 
 // 초기화 실행
