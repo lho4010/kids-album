@@ -83,8 +83,12 @@ async function showPage(pageNum) {
         const postPage = document.getElementById(`page-${pageNum}`);
         if (postPage) {
             postPage.classList.add('active');
-            loadPageImages(postPage);
-            initPostPhotoControls(postPage);
+            
+            // 약간의 지연 후 이미지 로드 (DOM 업데이트 보장)
+            setTimeout(() => {
+                loadPageImages(postPage);
+                initPostPhotoControls(postPage);
+            }, 100);
         }
     }
     
@@ -126,20 +130,15 @@ async function loadPost(postId) {
 
 // 페이지 이미지 로드 (현재 슬라이드 + 다음 몇 개)
 function loadPageImages(pageElement) {
-    // 현재 활성 슬라이드 이미지 먼저 로드
-    const activeSlide = pageElement.querySelector('.photo-slide.active img[data-src]');
-    if (activeSlide && !activeSlide.classList.contains('loaded')) {
-        activeSlide.src = activeSlide.dataset.src;
-        activeSlide.classList.add('loaded');
-    }
+    // 모든 이미지 찾기
+    const allImages = pageElement.querySelectorAll('img[data-src]');
     
-    // 다음 4개 슬라이드 이미지도 미리 로드
-    const allSlides = pageElement.querySelectorAll('.photo-slide img[data-src]:not(.loaded)');
-    const maxPreload = 4;
+    if (allImages.length === 0) return;
     
-    for (let i = 0; i < Math.min(maxPreload, allSlides.length); i++) {
-        const img = allSlides[i];
-        if (img.dataset.src) {
+    // 첫 5개 이미지 즉시 로드
+    for (let i = 0; i < Math.min(5, allImages.length); i++) {
+        const img = allImages[i];
+        if (img.dataset.src && !img.src) {
             img.src = img.dataset.src;
             img.classList.add('loaded');
         }
