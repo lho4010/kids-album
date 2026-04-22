@@ -61,9 +61,9 @@ body::after {
     position: relative;
     width: 100%;
     max-width: 1800px;
-    height: 92vh;
-    height: calc(var(--vh, 1vh) * 92);
-    max-height: 1000px;
+    height: calc(100vh - 120px);
+    max-height: 900px;
+    margin-bottom: 80px;
 }
 
 /* 앨범 책 */
@@ -593,6 +593,46 @@ body::after {
     align-items: center;
 }
 
+.photo-nav {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.photo-nav-btn {
+    pointer-events: auto;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #FF6BA9 0%, #FF8DC7 100%);
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(255, 107, 169, 0.4);
+    transition: all 0.3s ease;
+}
+
+.photo-nav-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(255, 107, 169, 0.5);
+}
+
+.photo-nav-btn:active {
+    transform: scale(0.95);
+}
+
 .photo-slide {
     position: absolute;
     width: 100%;
@@ -676,8 +716,8 @@ body::after {
 
 /* 네비게이션 */
 .navigation {
-    position: absolute;
-    bottom: -85px;
+    position: fixed;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -688,6 +728,7 @@ body::after {
     border-radius: 60px;
     box-shadow: 0 8px 40px rgba(255, 107, 169, 0.3);
     border: 3px solid rgba(255, 183, 213, 0.3);
+    z-index: 1000;
 }
 
 .nav-btn {
