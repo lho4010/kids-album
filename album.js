@@ -294,13 +294,17 @@ function showPage(pageNum) {
     });
 }
 
-// 페이지별 이미지 로드 - 현재 보이는 것만
+// 페이지별 이미지 로드 - 현재 보이는 것만 (최대 10개 제한)
 function loadPageImages(pageElement) {
     const images = pageElement.querySelectorAll('img[data-src]:not(.loaded)');
     
+    // 최대 10개까지만 로드 (대역폭 절약)
+    const maxLoad = 10;
+    const loadCount = Math.min(maxLoad, images.length);
+    
     // 처음 3개만 즉시 로드 (빠른 표시)
     const initialLoad = 3;
-    for (let i = 0; i < Math.min(initialLoad, images.length); i++) {
+    for (let i = 0; i < Math.min(initialLoad, loadCount); i++) {
         const img = images[i];
         if (img.dataset.src) {
             img.src = img.dataset.src;
@@ -308,8 +312,8 @@ function loadPageImages(pageElement) {
         }
     }
     
-    // 나머지는 Intersection Observer로 스크롤 시 로드
-    if (images.length > initialLoad && 'IntersectionObserver' in window) {
+    // 나머지 7개는 Intersection Observer로 (최대 10개까지만)
+    if (loadCount > initialLoad && 'IntersectionObserver' in window) {
         const imageObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -322,13 +326,51 @@ function loadPageImages(pageElement) {
                 }
             });
         }, {
-            rootMargin: '100px'  // 뷰포트 100px 전에 미리 로드
+            rootMargin: '50px'  // 뷰포트 50px 전에 미리 로드
         });
         
-        for (let i = initialLoad; i < images.length; i++) {
+        // 최대 10개까지만 관찰
+        for (let i = initialLoad; i < loadCount; i++) {
             imageObserver.observe(images[i]);
         }
     }
+    
+    // 나머지 이미지는 "더 보기" 버튼으로 수동 로드
+    if (images.length > maxLoad) {
+        addLoadMoreButton(pageElement, images, maxLoad);
+    }
+}
+
+// "더 보기" 버튼 추가
+function addLoadMoreButton(pageElement, images, startIndex) {
+    // 기존 버튼 제거
+    const existingBtn = pageElement.querySelector('.load-more-btn');
+    if (existingBtn) {
+        existingBtn.remove();
+    }
+    
+    // 새 버튼 생성
+    const photoViewer = pageElement.querySelector('.photo-viewer');
+    if (!photoViewer) return;
+    
+    const btn = document.createElement('button');
+    btn.className = 'load-more-btn';
+    btn.textContent = `나머지 ${images.length - startIndex}개 사진 더 보기`;
+    btn.style.cssText = 'position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background: #ff69b4; color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; z-index: 100;';
+    
+    btn.onclick = () => {
+        // 나머지 이미지 모두 로드
+        for (let i = startIndex; i < images.length; i++) {
+            const img = images[i];
+            if (img.dataset.src && !img.classList.contains('loaded')) {
+                img.src = img.dataset.src;
+                img.classList.add('loaded');
+            }
+        }
+        btn.remove();
+    };
+    
+    photoViewer.appendChild(btn);
 }
 
 // 페이지 언로드 - 메모리 절약
