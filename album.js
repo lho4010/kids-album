@@ -431,13 +431,13 @@ function openLightbox(imageSrc, slides, startIndex) {
     const lightboxImg = document.getElementById('lightboxImg');
     const lightboxCaption = document.getElementById('lightboxCaption');
     
-    // 모든 이미지 수집
+    // 모든 이미지 수집 (고화질 버전 사용)
     lightboxImages = [];
     slides.forEach(slide => {
         const img = slide.querySelector('img');
         if (img) {
             lightboxImages.push({
-                src: img.src,
+                src: img.dataset.fullsize || img.src,  // 고화질 또는 원본
                 alt: img.alt || '사진'
             });
         }
