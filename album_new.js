@@ -124,13 +124,21 @@ async function loadPost(postId) {
     }
 }
 
-// 페이지 이미지 로드 (최대 5개만)
+// 페이지 이미지 로드 (현재 슬라이드 + 다음 몇 개)
 function loadPageImages(pageElement) {
-    const images = pageElement.querySelectorAll('img[data-src]:not(.loaded)');
-    const maxLoad = 5;
+    // 현재 활성 슬라이드 이미지 먼저 로드
+    const activeSlide = pageElement.querySelector('.photo-slide.active img[data-src]');
+    if (activeSlide && !activeSlide.classList.contains('loaded')) {
+        activeSlide.src = activeSlide.dataset.src;
+        activeSlide.classList.add('loaded');
+    }
     
-    for (let i = 0; i < Math.min(maxLoad, images.length); i++) {
-        const img = images[i];
+    // 다음 4개 슬라이드 이미지도 미리 로드
+    const allSlides = pageElement.querySelectorAll('.photo-slide img[data-src]:not(.loaded)');
+    const maxPreload = 4;
+    
+    for (let i = 0; i < Math.min(maxPreload, allSlides.length); i++) {
+        const img = allSlides[i];
         if (img.dataset.src) {
             img.src = img.dataset.src;
             img.classList.add('loaded');
