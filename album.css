@@ -332,6 +332,102 @@ body::after {
     border-color: #FF6BA9;
 }
 
+/* 썸네일 옵션 */
+.thumb-options {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.thumb-label {
+    font-size: 0.9em;
+    color: #FF6BA9;
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.thumb-btn {
+    background: rgba(255, 183, 213, 0.2);
+    border: 2px solid #FFB7D5;
+    color: #FF6BA9;
+    padding: 6px 14px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.thumb-btn:hover {
+    background: rgba(255, 183, 213, 0.4);
+    transform: translateY(-2px);
+}
+
+.thumb-btn.active {
+    background: linear-gradient(135deg, #FF6BA9 0%, #FFB7D5 100%);
+    color: white;
+    border-color: #FF6BA9;
+}
+
+/* 목차 아이템 썸네일 그리드 */
+.toc-thumbnails {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.toc-thumbnails.grid-0 {
+    display: none;
+}
+
+.toc-thumbnails.grid-1 {
+    grid-template-columns: 1fr;
+}
+
+.toc-thumbnails.grid-1 img {
+    height: 80px;
+}
+
+.toc-thumbnails.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.toc-thumbnails.grid-3 img {
+    height: 50px;
+}
+
+.toc-thumbnails.grid-6 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.toc-thumbnails.grid-6 img {
+    height: 45px;
+}
+
+.toc-thumbnails.grid-9 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.toc-thumbnails.grid-9 img {
+    height: 40px;
+}
+
+.toc-thumbnails img {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+}
+
+.toc-thumbnails img:hover {
+    transform: scale(1.05);
+}
+
 .toc-list {
     flex: 1;
     overflow-y: auto;
@@ -1128,6 +1224,30 @@ body::after {
         font-size: 0.9em;
     }
 
+    .thumb-options {
+        margin-bottom: 12px;
+        gap: 6px;
+    }
+
+    .thumb-label {
+        font-size: 0.8em;
+    }
+
+    .thumb-btn {
+        padding: 5px 10px;
+        font-size: 0.75em;
+    }
+
+    .toc-thumbnails.grid-3 img,
+    .toc-thumbnails.grid-6 img,
+    .toc-thumbnails.grid-9 img {
+        height: 35px;
+    }
+
+    .toc-thumbnails.grid-1 img {
+        height: 60px;
+    }
+
     .toc-list {
         padding-right: 5px;
         overflow-y: auto;
@@ -1521,5 +1641,178 @@ body::after {
         width: 48px;
         height: 48px;
         font-size: 1.2em;
+    }
+}
+
+/* 썸네일 표시 옵션 */
+.thumbnail-options {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 15px;
+}
+
+.thumb-option-label {
+    font-size: 0.9em;
+    color: #666;
+    font-weight: 500;
+}
+
+.thumb-option-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.thumb-option-btn {
+    padding: 8px 16px;
+    border: 2px solid #FF6BA9;
+    background: white;
+    color: #FF6BA9;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85em;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.thumb-option-btn:hover {
+    background: #FFF0F5;
+}
+
+.thumb-option-btn.active {
+    background: linear-gradient(135deg, #FF6BA9 0%, #FF8DC7 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* 그리드 모드 스타일 */
+.photo-slides.grid-mode {
+    display: grid !important;
+    gap: 8px;
+    padding: 15px;
+    overflow-y: auto;
+    align-content: start;
+}
+
+.photo-slides.grid-1 {
+    grid-template-columns: 1fr;
+}
+
+.photo-slides.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.photo-slides.grid-6 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.photo-slides.grid-9 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.photo-slides.grid-mode .photo-slide {
+    position: relative !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    cursor: pointer;
+}
+
+.photo-slides.grid-mode .photo-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.photo-slides.grid-mode .photo-slide:hover img {
+    transform: scale(1.05);
+}
+
+.photo-slides.grid-mode .photo-caption {
+    display: none;
+}
+
+.photo-slides.grid-mode + .photo-nav {
+    display: none;
+}
+
+/* 모바일 그리드 반응형 */
+@media (max-width: 768px) {
+    .thumbnail-options {
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .thumb-option-buttons {
+        gap: 6px;
+    }
+
+    .thumb-option-btn {
+        padding: 6px 12px;
+        font-size: 0.8em;
+    }
+
+    .photo-slides.grid-3,
+    .photo-slides.grid-6 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .photo-slides.grid-9 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .thumb-option-btn {
+        padding: 5px 10px;
+        font-size: 0.75em;
+    }
+
+    .photo-slides.grid-6,
+    .photo-slides.grid-9 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .thumb-options {
+        gap: 4px;
+        margin-bottom: 10px;
+    }
+
+    .thumb-label {
+        font-size: 0.75em;
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 4px;
+    }
+
+    .thumb-btn {
+        padding: 4px 8px;
+        font-size: 0.7em;
+    }
+
+    .toc-thumbnails.grid-6,
+    .toc-thumbnails.grid-9 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .toc-thumbnails.grid-3 img,
+    .toc-thumbnails.grid-6 img,
+    .toc-thumbnails.grid-9 img {
+        height: 30px;
+    }
+
+    .toc-thumbnails.grid-1 img {
+        height: 50px;
     }
 }

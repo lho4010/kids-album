@@ -1,6 +1,7 @@
 // 성장 앨범 - 분할 버전
 let currentPage = 0;
 let loadedPosts = {};  // 캐시된 게시글
+let currentThumbCount = parseInt(localStorage.getItem('thumbCount')) || 3;  // 썸네일 개수
 
 // DOM 요소
 const postContainer = document.getElementById('post-container');
@@ -35,6 +36,9 @@ function init() {
         else if (e.key === 'Home') goToPage(0);
         else if (e.key === 'End') goToPage(TOTAL_POSTS);
     });
+    
+    // 썸네일 옵션 초기화
+    initThumbOptions();
     
     // 목차 클릭 이벤트
     initTocEvents();
@@ -88,6 +92,7 @@ async function showPage(pageNum) {
             setTimeout(() => {
                 loadPageImages(postPage);
                 initPostPhotoControls(postPage);
+                updatePhotoGridMode();
             }, 100);
         }
     }
@@ -181,6 +186,72 @@ function initPostPhotoControls(pageElement) {
         slide.addEventListener('click', () => {
             openLightbox(slides, index);
         });
+    });
+}
+
+// 썸네일 옵션 초기화
+function initThumbOptions() {
+    const optionButtons = document.querySelectorAll('.thumb-option-btn');
+    
+    // 저장된 값으로 활성 버튼 설정
+    optionButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.count) === currentThumbCount) {
+            btn.classList.add('active');
+        }
+        
+        btn.addEventListener('click', function() {
+            const count = parseInt(this.dataset.count);
+            currentThumbCount = count;
+            localStorage.setItem('thumbCount', count);
+            
+            // 버튼 활성화 상태 변경
+            optionButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 현재 페이지의 사진 뷰어 업데이트
+            updatePhotoGridMode();
+        });
+    });
+}
+
+// 사진 그리드 모드 업데이트
+function updatePhotoGridMode() {
+    const activePage = document.querySelector('.page-spread.active');
+    if (!activePage) return;
+    
+    const photoSlides = activePage.querySelector('.photo-slides');
+    if (!photoSlides) return;
+    
+    // 기존 그리드 클래스 제거
+    photoSlides.classList.remove('grid-mode', 'grid-1', 'grid-3', 'grid-6', 'grid-9');
+    
+    // 새 그리드 모드 적용
+    photoSlides.classList.add('grid-mode', `grid-${currentThumbCount}`);
+    
+    // 모든 슬라이드 가져오기
+    const allSlides = photoSlides.querySelectorAll('.photo-slide');
+    
+    // 표시할 슬라이드 수 제한
+    allSlides.forEach((slide, index) => {
+        if (index < currentThumbCount) {
+            slide.style.display = 'flex';
+            // 이미지 로드
+            const img = slide.querySelector('img');
+            if (img && img.dataset.src && !img.classList.contains('loaded')) {
+                img.src = img.dataset.src;
+                img.classList.add('loaded');
+            }
+        } else {
+            slide.style.display = 'none';
+        }
+    });
+    
+    // 그리드 모드에서 이미지 클릭 시 라이트박스 열기 (전체 이미지로)
+    allSlides.forEach((slide, index) => {
+        slide.onclick = () => {
+            openLightbox(allSlides, index);
+        };
     });
 }
 

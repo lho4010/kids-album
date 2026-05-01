@@ -19,6 +19,9 @@ let currentTocPage = 1;
 let totalTocPages = 1;
 let allTocItems = [];
 
+// 썸네일 설정
+let currentThumbCount = parseInt(localStorage.getItem('thumbCount')) || 3;
+
 // DOM 요소
 const pages = document.querySelectorAll('.page-spread');
 const prevBtn = document.getElementById('prevBtn');
@@ -92,6 +95,9 @@ function initTocPagination() {
             updateTocDisplay();
         });
     });
+    
+    // 썸네일 옵션 버튼 초기화
+    initThumbOptions();
     
     // 목차 네비게이션
     const prevTocBtn = document.getElementById('prevTocBtn');
@@ -572,6 +578,83 @@ document.addEventListener('DOMContentLoaded', () => {
 function initLazyLoading() {
     // 아무것도 하지 않음 (HTML에서 이미 data-src로 설정됨)
     // 페이지별로 필요할 때만 로드
+}
+
+// 썸네일 옵션 초기화
+function initThumbOptions() {
+    const thumbBtns = document.querySelectorAll('.thumb-btn');
+    
+    // 저장된 값으로 활성 버튼 설정
+    thumbBtns.forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.count) === currentThumbCount) {
+            btn.classList.add('active');
+        }
+        
+        btn.addEventListener('click', () => {
+            const count = parseInt(btn.dataset.count);
+            currentThumbCount = count;
+            localStorage.setItem('thumbCount', count);
+            
+            // 버튼 활성화 상태 변경
+            thumbBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // 썸네일 업데이트
+            generateTocThumbnails();
+        });
+    });
+    
+    // 초기 썸네일 생성
+    generateTocThumbnails();
+}
+
+// 목차 썸네일 생성
+function generateTocThumbnails() {
+    allTocItems.forEach(item => {
+        const dateEl = item.querySelector('.toc-date');
+        const titleEl = item.querySelector('.toc-title-text');
+        
+        if (!dateEl || !titleEl) return;
+        
+        const dateCode = dateEl.textContent.trim();
+        const title = titleEl.textContent.trim();
+        const folderName = dateCode + '_' + title;
+        
+        // 기존 썸네일 제거
+        const existingThumbs = item.querySelector('.toc-thumbnails');
+        if (existingThumbs) {
+            existingThumbs.remove();
+        }
+        
+        // 썸네일 0개면 스킵
+        if (currentThumbCount === 0) return;
+        
+        // 썸네일 컨테이너 생성
+        const thumbContainer = document.createElement('div');
+        thumbContainer.className = 'toc-thumbnails grid-' + currentThumbCount;
+        
+        // 이미지 생성
+        for (let i = 1; i <= currentThumbCount; i++) {
+            const img = document.createElement('img');
+            img.src = 'data/thumbnails/' + folderName + '/images/image_' + i + '.jpg';
+            img.alt = title + ' - ' + i;
+            img.loading = 'lazy';
+            img.onerror = function() {
+                // 로드 실패 시 첫 번째 이미지로 대체 시도
+                if (i !== 1) {
+                    this.src = 'data/thumbnails/' + folderName + '/images/image_1.jpg';
+                }
+                this.onerror = function() {
+                    this.style.display = 'none';
+                };
+            };
+            thumbContainer.appendChild(img);
+        }
+        
+        // 목차 아이템 맨 앞에 삽입
+        item.insertBefore(thumbContainer, item.firstChild);
+    });
 }
 
 // 초기화 실행
