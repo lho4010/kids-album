@@ -76,7 +76,10 @@ function init() {
     // 사진 컨트롤 초기화
     initPhotoControls();
     
-    // 터치 스와이프 (모바일)
+    // 컨텐츠 페이지 썸네일 그리드 초기화
+    initContentThumbnails();
+    
+    // 터치 스와이프 (모바일) - 비활성화됨
     initTouchSwipe();
 }
 
@@ -96,8 +99,6 @@ function initTocPagination() {
         });
     });
     
-    // 썸네일 옵션 버튼 초기화
-    initThumbOptions();
     
     // 목차 네비게이션
     const prevTocBtn = document.getElementById('prevTocBtn');
@@ -201,39 +202,10 @@ function scrollToTop() {
     }
 }
 
-// 터치 스와이프 기능
+// 터치 스와이프 기능 - 페이지 이동 비활성화 (사진 넘기기만 가능)
 function initTouchSwipe() {
-    let touchStartX = 0;
-    let touchEndX = 0;
-    let touchStartY = 0;
-    let touchEndY = 0;
-    
-    document.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
-    
-    document.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        handleSwipe();
-    }, { passive: true });
-    
-    function handleSwipe() {
-        const diffX = touchEndX - touchStartX;
-        const diffY = touchEndY - touchStartY;
-        
-        // 수평 스와이프가 수직 스와이프보다 클 때만 페이지 넘김
-        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-            if (diffX > 0) {
-                // 오른쪽 스와이프 - 이전 페이지
-                goToPage(currentPage - 1);
-            } else {
-                // 왼쪽 스와이프 - 다음 페이지
-                goToPage(currentPage + 1);
-            }
-        }
-    }
+    // 페이지 스와이프 기능 제거 - 사진 넘기다가 실수로 페이지가 넘어가는 문제 방지
+    // 사진 스와이프는 initPhotoControls에서 처리
 }
 
 // 페이지 이동
@@ -580,80 +552,166 @@ function initLazyLoading() {
     // 페이지별로 필요할 때만 로드
 }
 
-// 썸네일 옵션 초기화
-function initThumbOptions() {
-    const thumbBtns = document.querySelectorAll('.thumb-btn');
+// 컨텐츠 페이지 썸네일 그리드 초기화
+function initContentThumbnails() {
+    const photoPages = document.querySelectorAll('.photo-page');
     
-    // 저장된 값으로 활성 버튼 설정
-    thumbBtns.forEach(btn => {
-        btn.classList.remove('active');
-        if (parseInt(btn.dataset.count) === currentThumbCount) {
-            btn.classList.add('active');
+    photoPages.forEach(photoPage => {
+        const photoViewer = photoPage.querySelector('.photo-viewer');
+        if (!photoViewer) return;
+        
+        // 썸네일 옵션 UI 추가
+        const existingOptions = photoPage.querySelector('.thumb-options');
+        if (!existingOptions) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'thumb-options';
+            optionsDiv.innerHTML = `
+                <span class="thumb-label">표시:</span>
+                <button class="thumb-btn" data-count="1">1개</button>
+                <button class="thumb-btn active" data-count="3">3개</button>
+                <button class="thumb-btn" data-count="6">6개</button>
+                <button class="thumb-btn" data-count="9">9개</button>
+            `;
+            photoPage.insertBefore(optionsDiv, photoViewer);
+            
+            // 저장된 값 적용
+            const btns = optionsDiv.querySelectorAll('.thumb-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.count) === currentThumbCount) {
+                    btn.classList.add('active');
+                }
+                
+                btn.addEventListener('click', () => {
+                    const count = parseInt(btn.dataset.count);
+                    currentThumbCount = count;
+                    localStorage.setItem('thumbCount', count);
+                    
+                    // 모든 페이지의 버튼 상태 업데이트
+                    document.querySelectorAll('.thumb-btn').forEach(b => {
+                        b.classList.remove('active');
+                        if (parseInt(b.dataset.count) === count) {
+                            b.classList.add('active');
+                        }
+                    });
+                    
+                    // 모든 페이지의 그리드 업데이트
+                    updateAllPhotoGrids();
+                });
+            });
         }
         
-        btn.addEventListener('click', () => {
-            const count = parseInt(btn.dataset.count);
-            currentThumbCount = count;
-            localStorage.setItem('thumbCount', count);
-            
-            // 버튼 활성화 상태 변경
-            thumbBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // 썸네일 업데이트
-            generateTocThumbnails();
-        });
+        // 그리드 컨테이너 생성
+        createPhotoGrid(photoPage);
     });
-    
-    // 초기 썸네일 생성
-    generateTocThumbnails();
 }
 
-// 목차 썸네일 생성
-function generateTocThumbnails() {
-    allTocItems.forEach(item => {
-        const dateEl = item.querySelector('.toc-date');
-        const titleEl = item.querySelector('.toc-title-text');
+// 사진 그리드 생성
+function createPhotoGrid(photoPage) {
+    const photoViewer = photoPage.querySelector('.photo-viewer');
+    if (!photoViewer) return;
+    
+    const slides = photoViewer.querySelectorAll('.photo-slide');
+    if (slides.length === 0) return;
+    
+    // 기존 그리드 제거
+    const existingGrid = photoViewer.querySelector('.photo-grid');
+    if (existingGrid) {
+        existingGrid.remove();
+    }
+    
+    // 그리드 컨테이너 생성
+    const gridContainer = document.createElement('div');
+    gridContainer.className = 'photo-grid grid-' + currentThumbCount;
+    
+    // 현재 시작 인덱스 (로테이트용)
+    let startIndex = parseInt(photoViewer.dataset.startIndex) || 0;
+    photoViewer.dataset.startIndex = startIndex;
+    
+    // 표시할 이미지 생성
+    for (let i = 0; i < currentThumbCount; i++) {
+        const slideIndex = (startIndex + i) % slides.length;
+        const slide = slides[slideIndex];
+        const img = slide.querySelector('img');
         
-        if (!dateEl || !titleEl) return;
-        
-        const dateCode = dateEl.textContent.trim();
-        const title = titleEl.textContent.trim();
-        const folderName = dateCode + '_' + title;
-        
-        // 기존 썸네일 제거
-        const existingThumbs = item.querySelector('.toc-thumbnails');
-        if (existingThumbs) {
-            existingThumbs.remove();
+        if (img) {
+            const gridItem = document.createElement('div');
+            gridItem.className = 'grid-item';
+            
+            const newImg = document.createElement('img');
+            newImg.src = img.src;
+            newImg.alt = img.alt;
+            newImg.dataset.fullsize = img.dataset.fullsize;
+            newImg.dataset.slideIndex = slideIndex;
+            newImg.loading = 'lazy';
+            
+            // 클릭 시 라이트박스
+            newImg.addEventListener('click', () => {
+                openLightbox(newImg.dataset.fullsize || newImg.src, slides, slideIndex);
+            });
+            
+            gridItem.appendChild(newImg);
+            gridContainer.appendChild(gridItem);
         }
-        
-        // 썸네일 0개면 스킵
-        if (currentThumbCount === 0) return;
-        
-        // 썸네일 컨테이너 생성
-        const thumbContainer = document.createElement('div');
-        thumbContainer.className = 'toc-thumbnails grid-' + currentThumbCount;
-        
-        // 이미지 생성
-        for (let i = 1; i <= currentThumbCount; i++) {
-            const img = document.createElement('img');
-            img.src = 'data/thumbnails/' + folderName + '/images/image_' + i + '.jpg';
-            img.alt = title + ' - ' + i;
-            img.loading = 'lazy';
-            img.onerror = function() {
-                // 로드 실패 시 첫 번째 이미지로 대체 시도
-                if (i !== 1) {
-                    this.src = 'data/thumbnails/' + folderName + '/images/image_1.jpg';
-                }
-                this.onerror = function() {
-                    this.style.display = 'none';
-                };
-            };
-            thumbContainer.appendChild(img);
+    }
+    
+    // 로테이트 네비게이션 추가
+    const navDiv = document.createElement('div');
+    navDiv.className = 'grid-nav';
+    navDiv.innerHTML = `
+        <button class="grid-nav-btn prev-grid">◀</button>
+        <span class="grid-info">${startIndex + 1}-${Math.min(startIndex + currentThumbCount, slides.length)} / ${slides.length}</span>
+        <button class="grid-nav-btn next-grid">▶</button>
+    `;
+    
+    // 이전/다음 버튼 이벤트
+    navDiv.querySelector('.prev-grid').addEventListener('click', () => {
+        let newStart = startIndex - currentThumbCount;
+        if (newStart < 0) {
+            newStart = Math.max(0, slides.length - currentThumbCount);
         }
-        
-        // 목차 아이템 맨 앞에 삽입
-        item.insertBefore(thumbContainer, item.firstChild);
+        photoViewer.dataset.startIndex = newStart;
+        createPhotoGrid(photoPage);
+    });
+    
+    navDiv.querySelector('.next-grid').addEventListener('click', () => {
+        let newStart = startIndex + currentThumbCount;
+        if (newStart >= slides.length) {
+            newStart = 0;
+        }
+        photoViewer.dataset.startIndex = newStart;
+        createPhotoGrid(photoPage);
+    });
+    
+    gridContainer.appendChild(navDiv);
+    
+    // 기존 슬라이드 숨기기
+    slides.forEach(slide => {
+        slide.style.display = 'none';
+    });
+    
+    // 기존 슬라이드 네비게이션 숨기기
+    const oldNav = photoViewer.querySelector('.photo-nav');
+    if (oldNav) {
+        oldNav.style.display = 'none';
+    }
+    const prevPhoto = photoPage.querySelector('.prev-photo');
+    const nextPhoto = photoPage.querySelector('.next-photo');
+    if (prevPhoto) prevPhoto.style.display = 'none';
+    if (nextPhoto) nextPhoto.style.display = 'none';
+    
+    photoViewer.appendChild(gridContainer);
+}
+
+// 모든 페이지의 그리드 업데이트
+function updateAllPhotoGrids() {
+    const photoPages = document.querySelectorAll('.photo-page');
+    photoPages.forEach(photoPage => {
+        const photoViewer = photoPage.querySelector('.photo-viewer');
+        if (photoViewer) {
+            photoViewer.dataset.startIndex = 0; // 리셋
+        }
+        createPhotoGrid(photoPage);
     });
 }
 

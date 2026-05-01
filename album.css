@@ -332,14 +332,17 @@ body::after {
     border-color: #FF6BA9;
 }
 
-/* 썸네일 옵션 */
+/* 썸네일 옵션 (컨텐츠 페이지용) */
 .thumb-options {
     display: flex;
     gap: 8px;
-    margin-bottom: 15px;
+    padding: 10px;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    margin-bottom: 10px;
 }
 
 .thumb-label {
@@ -372,60 +375,112 @@ body::after {
     border-color: #FF6BA9;
 }
 
-/* 목차 아이템 썸네일 그리드 */
-.toc-thumbnails {
+/* 사진 그리드 */
+.photo-grid {
     display: grid;
-    gap: 4px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    overflow: hidden;
+    gap: 8px;
+    padding: 10px;
+    height: calc(100% - 60px);
+    align-content: start;
 }
 
-.toc-thumbnails.grid-0 {
-    display: none;
-}
-
-.toc-thumbnails.grid-1 {
+/* 1개: 1행 1열 */
+.photo-grid.grid-1 {
     grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
 }
 
-.toc-thumbnails.grid-1 img {
-    height: 80px;
+.photo-grid.grid-1 .grid-item {
+    height: 100%;
+    max-height: 400px;
 }
 
-.toc-thumbnails.grid-3 {
+/* 3개: 1행 3열 */
+.photo-grid.grid-3 {
     grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
 }
 
-.toc-thumbnails.grid-3 img {
-    height: 50px;
+.photo-grid.grid-3 .grid-item {
+    height: 100%;
+    max-height: 200px;
 }
 
-.toc-thumbnails.grid-6 {
+/* 6개: 2행 3열 */
+.photo-grid.grid-6 {
     grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
 }
 
-.toc-thumbnails.grid-6 img {
-    height: 45px;
+.photo-grid.grid-6 .grid-item {
+    height: 100%;
+    max-height: 150px;
 }
 
-.toc-thumbnails.grid-9 {
+/* 9개: 3행 3열 */
+.photo-grid.grid-9 {
     grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
 }
 
-.toc-thumbnails.grid-9 img {
-    height: 40px;
+.photo-grid.grid-9 .grid-item {
+    height: 100%;
+    max-height: 120px;
 }
 
-.toc-thumbnails img {
+.grid-item {
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.grid-item:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.grid-item img {
     width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 4px;
-    transition: transform 0.2s ease;
 }
 
-.toc-thumbnails img:hover {
-    transform: scale(1.05);
+/* 그리드 네비게이션 */
+.grid-nav {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    margin-top: auto;
+}
+
+.grid-nav-btn {
+    background: linear-gradient(135deg, #FF6BA9 0%, #FFB7D5 100%);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid-nav-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(255, 107, 169, 0.4);
+}
+
+.grid-info {
+    font-size: 0.9em;
+    color: #666;
+    font-weight: 600;
 }
 
 .toc-list {
@@ -1225,27 +1280,51 @@ body::after {
     }
 
     .thumb-options {
-        margin-bottom: 12px;
-        gap: 6px;
+        margin-bottom: 8px;
+        gap: 5px;
+        padding: 8px;
     }
 
     .thumb-label {
-        font-size: 0.8em;
-    }
-
-    .thumb-btn {
-        padding: 5px 10px;
         font-size: 0.75em;
     }
 
-    .toc-thumbnails.grid-3 img,
-    .toc-thumbnails.grid-6 img,
-    .toc-thumbnails.grid-9 img {
-        height: 35px;
+    .thumb-btn {
+        padding: 4px 10px;
+        font-size: 0.7em;
     }
 
-    .toc-thumbnails.grid-1 img {
-        height: 60px;
+    /* 모바일에서도 PC와 동일한 그리드 유지 */
+    .photo-grid {
+        gap: 5px;
+        padding: 5px;
+    }
+
+    .photo-grid.grid-3 .grid-item {
+        max-height: 100px;
+    }
+
+    .photo-grid.grid-6 .grid-item {
+        max-height: 80px;
+    }
+
+    .photo-grid.grid-9 .grid-item {
+        max-height: 60px;
+    }
+
+    .grid-nav {
+        gap: 10px;
+        padding: 5px;
+    }
+
+    .grid-nav-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1em;
+    }
+
+    .grid-info {
+        font-size: 0.8em;
     }
 
     .toc-list {
@@ -1784,35 +1863,49 @@ body::after {
     }
 
     .thumb-options {
-        gap: 4px;
-        margin-bottom: 10px;
+        gap: 3px;
+        margin-bottom: 5px;
+        padding: 5px;
     }
 
     .thumb-label {
-        font-size: 0.75em;
-        display: block;
-        width: 100%;
-        text-align: center;
-        margin-bottom: 4px;
-    }
-
-    .thumb-btn {
-        padding: 4px 8px;
         font-size: 0.7em;
     }
 
-    .toc-thumbnails.grid-6,
-    .toc-thumbnails.grid-9 {
-        grid-template-columns: repeat(2, 1fr);
+    .thumb-btn {
+        padding: 3px 7px;
+        font-size: 0.65em;
     }
 
-    .toc-thumbnails.grid-3 img,
-    .toc-thumbnails.grid-6 img,
-    .toc-thumbnails.grid-9 img {
+    /* 480px 이하에서도 3열 그리드 유지 */
+    .photo-grid {
+        gap: 3px;
+        padding: 3px;
+    }
+
+    .photo-grid.grid-1 .grid-item {
+        max-height: 150px;
+    }
+
+    .photo-grid.grid-3 .grid-item {
+        max-height: 70px;
+    }
+
+    .photo-grid.grid-6 .grid-item {
+        max-height: 55px;
+    }
+
+    .photo-grid.grid-9 .grid-item {
+        max-height: 45px;
+    }
+
+    .grid-nav-btn {
+        width: 30px;
         height: 30px;
+        font-size: 0.9em;
     }
 
-    .toc-thumbnails.grid-1 img {
-        height: 50px;
+    .grid-info {
+        font-size: 0.7em;
     }
 }
