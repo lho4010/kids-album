@@ -1,3 +1,6 @@
+// 우리 아이 성장 앨범 - album.js
+// Last updated: 2026-05-01 - 썸네일 그리드 기능 추가
+
 // 모바일 뷰포트 높이 계산 (주소창 문제 해결)
 function setViewportHeight() {
     let vh = window.innerHeight * 0.01;
